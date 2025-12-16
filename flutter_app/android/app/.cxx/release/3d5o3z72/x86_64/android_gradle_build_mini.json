@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/Users/akash/Development/flutter/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/akash/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/akash/Pictures/ride-sync/flutter_app/android/app/.cxx/release/3d5o3z72/x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/akash/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/akash/Pictures/ride-sync/flutter_app/android/app/.cxx/release/3d5o3z72/x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
