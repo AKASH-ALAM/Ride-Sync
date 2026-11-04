@@ -1,0 +1,49 @@
+@model LabVm
+@{ ViewData["Title"] = "Race Lab"; }
+<div class="container-xl py-5" style="max-width:1000px">
+<h2>🧪 Race Lab</h2>
+<p class="text-muted">Fires N simultaneous requests at the <b class="text-danger">buggy</b> code and at the <b class="text-success">safe</b> code, then shows what happened.</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6"><form asp-action="Accept" method="post" class="card card-body">
+        <h5>Scenario 1 — Many drivers, one ride</h5>
+        <p class="small">Every driver presses "Accept" on the same ride at the same instant. Correct answer: <b>exactly 1</b> winner.</p>
+        <div class="input-group"><span class="input-group-text">Drivers</span><input name="drivers" type="number" value="30" min="2" max="100" class="form-control" /><button class="btn btn-dark">Run</button></div>
+    </form></div>
+    <div class="col-md-6"><form asp-action="Wallet" method="post" class="card card-body">
+        <h5>Scenario 2 — Double-spend</h5>
+        <p class="small">Balance 100.00, N parallel withdrawals of 30.00. Correct answer: <b>exactly 3</b> succeed, final balance 10.00.</p>
+        <div class="input-group"><span class="input-group-text">Attempts</span><input name="attempts" type="number" value="10" min="2" max="50" class="form-control" /><button class="btn btn-dark">Run</button></div>
+    </form></div>
+</div>
+
+@if (Model.UnsafeAccept is not null && Model.SafeAccept is not null)
+{
+    <div class="row g-3">
+        <div class="col-md-6"><div class="card border-danger"><div class="card-header bg-danger text-white">❌ Unsafe (check-then-act, no lock)</div><div class="card-body">
+            <div class="display-4">@Model.UnsafeAccept.Winners</div>
+            <p>of @Model.UnsafeAccept.Drivers drivers were told <b>"you got the ride"</b>. Only one can actually be assigned → <b>double assignment</b>.</p>
+            <small class="text-muted">@Model.UnsafeAccept.Ms ms</small></div></div></div>
+        <div class="col-md-6"><div class="card border-success"><div class="card-header bg-success text-white">✅ Safe (Redis lock + rowversion check)</div><div class="card-body">
+            <div class="display-4">@Model.SafeAccept.Winners</div>
+            <p>winner, <b>@Model.SafeAccept.Rejected</b> cleanly rejected@(Model.SafeAccept.Busy > 0 ? $", {Model.SafeAccept.Busy} asked to retry (lock wait timed out)" : "").</p>
+            <small class="text-muted">@Model.SafeAccept.Ms ms</small></div></div></div>
+    </div>
+}
+@if (Model.UnsafeWallet is not null && Model.SafeWallet is not null)
+{
+    <div class="row g-3">
+        @foreach (var (r, safe) in new[] { (Model.UnsafeWallet, false), (Model.SafeWallet, true) })
+        {
+            <div class="col-md-6"><div class="card @(safe ? "border-success" : "border-danger")">
+                <div class="card-header @(safe ? "bg-success" : "bg-danger") text-white">@(safe ? "✅ Safe (atomic UPDATE … WHERE Balance >= x)" : "❌ Unsafe (read → compute → write)")</div>
+                <div class="card-body">
+                    <div class="display-4">@r.Succeeded</div>
+                    <p>withdrawals succeeded (max possible: @r.ExpectedMaxSuccess). Final balance: <b>@((r.FinalCents / 100.0).ToString("0.00"))</b>
+                       @if (!safe && r.Overdrawn) { <span class="badge text-bg-danger">money created out of thin air</span> }</p>
+                </div></div></div>
+        }
+    </div>
+}
+
+</div>

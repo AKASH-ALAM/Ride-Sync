@@ -1,0 +1,59 @@
+@model DriverPanelVm
+@{
+    var a = Model.Active;
+    int step = a?.Status switch { RideStatus.Accepted => 1, RideStatus.DriverArrived => 2, RideStatus.InProgress => 3, _ => 0 };
+}
+<div id="rideData" hidden data-ride='@RideSync.Web.Controllers.RidesController.RideJson(a)'></div>
+<div class="d-flex gap-2 mb-3">
+    <div class="stat"><b>৳@Model.TodayEarnings.ToString("N0")</b><span class="muted small">Today</span></div>
+    <div class="stat"><b>@Model.TodayTrips</b><span class="muted small">Trips</span></div>
+    <div class="stat"><b>@(Model.Rating is { } rt ? $"★ {rt:0.0}" : "★ —")</b><span class="muted small">@Model.RatingCount ratings</span></div>
+</div>
+@if (a is null)
+{
+    <div class="when-offline p-4 rounded-4 bg-light text-center">
+        <div style="font-size:2.4rem">🚗</div><h4>You're offline</h4>
+        <p class="muted mb-0">Tap <b>Go online</b> on the map to start receiving ride requests near you.</p>
+    </div>
+    <div class="when-online">
+        <h3>Ride requests</h3>
+        @if (Model.Available.Count == 0) { <div class="searching"><div class="radar"></div><p class="muted">Looking for riders… requests appear here instantly.</p></div> }
+        @foreach (var r in Model.Available)
+        {
+            var v = Pricing.Vehicles[r.VehicleType];
+            <div class="req">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div><span class="chip">@v.Icon @v.Name</span> <span class="muted small">@r.RiderName @(r.RiderRating is { } rr ? $"· ★{rr:0.0}" : "")</span></div>
+                    <div class="fare">৳@r.Fare.ToString("0")</div>
+                </div>
+                <div class="my-2"><div class="small">● @r.Pickup</div><div class="small">■ @r.Drop</div></div>
+                <div class="d-flex justify-content-between align-items-center"><span class="muted small">@r.DistanceKm.ToString("0.0") km</span>
+                    <form asp-action="Accept" method="post" data-ajax class="m-0"><input type="hidden" name="id" value="@r.Id" /><button class="btn btn-dark btn-sm px-4">Accept</button></form></div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    string? next = a.Status switch { RideStatus.Accepted => "driver_arrived", RideStatus.DriverArrived => "in_progress", RideStatus.InProgress => "completed", _ => null };
+    string? label = a.Status switch { RideStatus.Accepted => "I've arrived", RideStatus.DriverArrived => "Start trip", RideStatus.InProgress => "Complete trip", _ => null };
+    <div class="steps"><i class="on"></i><i class="@(step >= 1 ? "on" : "")"></i><i class="@(step >= 2 ? "on" : "")"></i><i class="@(step >= 3 ? "on" : "")"></i></div>
+    <h3>@(a.Status switch { RideStatus.Accepted => "Pick up " + a.Rider?.Name, RideStatus.DriverArrived => "Waiting for " + a.Rider?.Name, _ => "Trip in progress" })</h3>
+    <div class="p-3 rounded-4 bg-light mb-3">
+        <div class="mb-2 d-flex gap-2"><span class="dot-a"></span><span>@a.Pickup</span></div>
+        <div class="d-flex gap-2"><span class="dot-b"></span><span>@a.Drop</span></div>
+    </div>
+    <div class="d-flex justify-content-between mb-3"><span class="muted">@a.DistanceKm.ToString("0.0") km · @a.DurationMin min</span>
+        <span class="fw-bold">৳@a.Fare.ToString("0") <span class="chip @(a.PaymentMethod == "cash" ? "amber" : "green")">@(a.PaymentMethod == "cash" ? "Cash trip" : "Paid via wallet")</span></span></div>
+    <div class="surge" style="background:#daf3e5;color:#05944f">💰 ৳@a.Fare.ToString("0") will be added to your wallet when you complete the trip.</div>
+    @if (next is not null)
+    {
+        <form asp-action="Status" method="post" data-ajax class="mb-2"><input type="hidden" name="id" value="@a.Id" /><input type="hidden" name="status" value="@next" />
+            <button class="btn btn-dark btn-lg w-100">@label</button></form>
+    }
+    @if (a.Status is RideStatus.Accepted or RideStatus.DriverArrived)
+    {
+        <form asp-action="Status" method="post" data-ajax><input type="hidden" name="id" value="@a.Id" /><input type="hidden" name="status" value="cancelled" />
+            <button class="btn btn-light w-100">Cancel trip</button></form>
+    }
+}

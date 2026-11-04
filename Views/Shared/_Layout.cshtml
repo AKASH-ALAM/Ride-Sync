@@ -1,0 +1,68 @@
+@{
+    var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+    var path = Context.Request.Path.Value ?? "/";
+    var isApp = ViewData["App"] is true;
+    string Act(string p) => path.StartsWith(p, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+    var onTrips = path.StartsWith("/Rides/History", StringComparison.OrdinalIgnoreCase) || path.StartsWith("/Rides/Receipt", StringComparison.OrdinalIgnoreCase);
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] – Ride Sync</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="@(isApp ? "app" : "")" data-online="false">
+<nav class="topnav">
+    <div class="container-xl h-100 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+            <a class="brand" asp-controller="Home" asp-action="Index"><span class="dot"></span>Ride Sync</a>
+            <div class="d-none d-md-flex gap-1">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a class="nl @(onTrips ? "" : Act("/Rides"))" asp-controller="Rides" asp-action="Index">@(role == "Driver" ? "Drive" : "Ride")</a>
+                    <a class="nl @(onTrips ? "active" : "")" asp-controller="Rides" asp-action="History">Trips</a>
+                    <a class="nl @Act("/Wallet")" asp-controller="Wallet" asp-action="Index">Wallet</a>
+                }
+                <a class="nl @Act("/Lab")" asp-controller="Lab" asp-action="Index">Race Lab</a>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <span class="avatar" title="@User.Identity.Name">@(User.Identity.Name?.Substring(0, 1).ToUpper())</span>
+                <span class="text-white small d-none d-md-inline">@User.Identity.Name · @role</span>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0"><button class="pill pill-dark">Log out</button></form>
+            }
+            else
+            {
+                <a class="pill pill-dark" asp-controller="Account" asp-action="Login">Log in</a>
+                <a class="pill pill-white" asp-controller="Account" asp-action="Register">Sign up</a>
+            }
+        </div>
+    </div>
+</nav>
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <div class="subnav d-md-none">
+        <a class="@(onTrips ? "" : Act("/Rides"))" asp-controller="Rides" asp-action="Index">@(role == "Driver" ? "Drive" : "Ride")</a>
+        <a class="@(onTrips ? "active" : "")" asp-controller="Rides" asp-action="History">Trips</a>
+        <a class="@Act("/Wallet")" asp-controller="Wallet" asp-action="Index">Wallet</a>
+        <a class="@Act("/Lab")" asp-controller="Lab" asp-action="Index">Race Lab</a>
+    </div>
+}
+<div class="toast-wrap" id="toasts">
+    @if (TempData["ok"] is string ok) { <div class="rs-toast">@ok</div> }
+    @if (TempData["err"] is string err) { <div class="rs-toast err">@err</div> }
+</div>
+@RenderBody()
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
+<script>setTimeout(() => document.querySelectorAll('.rs-toast').forEach(t => t.remove()), 4000);</script>
+</body>
+</html>

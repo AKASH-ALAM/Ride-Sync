@@ -1,0 +1,22 @@
+@model WalletVm
+@{ ViewData["Title"] = "Wallet"; }
+<div class="container-xl py-5" style="max-width:900px">
+<h2 class="mb-4" style="font-size:2.2rem">Wallet</h2>
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="p-4 rounded-4 bg-black text-white h-100"><div style="color:#afafaf">Balance</div><div style="font-size:2.6rem;font-weight:800">৳@Model.Balance.ToString("N2")</div></div></div>
+    <div class="col-md-4"><form asp-action="TopUp" method="post" class="p-4 rounded-4 bg-light h-100">
+        <label class="form-label fw-bold">Add money</label>
+        <div class="input-group"><input name="amount" type="number" step="0.01" min="1" class="form-control" placeholder="৳ amount" required /><button class="btn btn-dark">Add</button></div></form></div>
+    <div class="col-md-4"><form asp-action="Withdraw" method="post" class="p-4 rounded-4 bg-light h-100">
+        <label class="form-label fw-bold">Cash out</label>
+        <div class="input-group"><input name="amount" type="number" step="0.01" min="1" class="form-control" placeholder="৳ amount" required /><button class="btn btn-dark">Withdraw</button></div></form></div>
+</div>
+<h5>Activity</h5>
+@if (Model.Transactions.Count == 0) { <p class="muted">No transactions yet.</p> }
+@foreach (var t in Model.Transactions)
+{
+    <div class="trip"><div class="ic">@(t.Type == "credit" ? "⬇️" : "⬆️")</div>
+        <div class="flex-grow-1"><div class="fw-semibold">@t.Description</div><div class="muted small">@t.CreatedAt.ToLocalTime().ToString("MMM d, HH:mm")</div></div>
+        <div class="fw-bold @(t.Type == "credit" ? "text-success" : "")">@(t.Type == "credit" ? "+" : "−")৳@((t.AmountCents / 100.0).ToString("N2"))</div></div>
+}
+</div>

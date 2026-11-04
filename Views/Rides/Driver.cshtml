@@ -1,0 +1,14 @@
+@{ ViewData["Title"] = "Drive"; ViewData["App"] = true; }
+<div class="shell">
+    <aside class="sidebar"><div id="panel"><div class="skeleton" style="width:60%;height:28px"></div><div class="skeleton"></div><div class="skeleton" style="width:80%"></div></div></aside>
+    <div id="map"></div>
+    <div class="map-bar">
+        <button class="map-btn" id="btnOnline"><span class="dotlive"></span><span class="t">Go online</span></button>
+        <button class="map-btn" id="btnSim" title="Demo mode: the app moves your car along the route instead of using real GPS">🎮 <span class="t">Simulate driving: off</span></button>
+    </div>
+</div>
+@section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+<script src="~/js/common.js" asp-append-version="true"></script>
+<script src="~/js/driver.js" asp-append-version="true"></script>
+}

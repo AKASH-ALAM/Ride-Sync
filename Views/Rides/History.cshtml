@@ -1,0 +1,18 @@
+@model HistoryVm
+@{ ViewData["Title"] = "Trips"; var driver = User.IsInRole(Roles.Driver); }
+<div class="container-xl py-5" style="max-width:900px">
+<h2 class="mb-4" style="font-size:2.2rem">Your trips</h2>
+@if (Model.Rides.Count == 0) { <p class="muted">No trips yet. <a asp-action="Index" class="fw-bold">@(driver ? "Go online" : "Request a ride")</a></p> }
+@foreach (var r in Model.Rides)
+{
+    <a class="trip" asp-action="Receipt" asp-route-id="@r.Id">
+        <div class="ic">@Pricing.Vehicles[r.VehicleType].Icon</div>
+        <div class="flex-grow-1">
+            <div class="fw-semibold">@r.Pickup → @r.Drop</div>
+            <div class="muted small">@r.RequestedAt.ToLocalTime().ToString("MMM d, HH:mm") · @r.DistanceKm.ToString("0.0") km · with @(driver ? r.Rider?.Name : (r.Driver?.Name ?? "—"))</div>
+        </div>
+        <div class="text-end"><div class="fw-bold">৳@r.Fare.ToString("0")</div>
+            <span class="chip @(r.Status == "completed" ? "green" : r.Status == "cancelled" ? "red" : "amber")">@r.Status.Replace('_', ' ')</span></div>
+    </a>
+}
+</div>

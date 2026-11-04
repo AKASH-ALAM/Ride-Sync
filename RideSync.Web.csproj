@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="10.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.14" />
+    <PackageReference Include="StackExchange.Redis" Version="3.4.31" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
+  </ItemGroup>
+
+
+  <!-- the test project lives in a sub-folder; keep its files out of the web project's compile -->
+  <ItemGroup>
+    <Compile Remove="RideSync.Tests/**" />
+    <Content Remove="RideSync.Tests/**" />
+    <EmbeddedResource Remove="RideSync.Tests/**" />
+    <None Remove="RideSync.Tests/**" />
+  </ItemGroup>
+
+</Project>

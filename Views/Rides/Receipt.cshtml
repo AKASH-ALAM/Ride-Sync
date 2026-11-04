@@ -1,0 +1,19 @@
+@model Ride
+@{ ViewData["Title"] = "Receipt"; var v = Pricing.Vehicles[Model.VehicleType]; var dist = v.PerKm * Model.DistanceKm; var time = v.PerMin * Model.DurationMin; var baseFare = v.Base;
+   var sub = baseFare + dist + time; var surgeAmt = Model.Fare - sub; }
+<div class="container"><div class="receipt">
+    <div class="d-flex justify-content-between align-items-center mb-3"><h2 class="m-0">Receipt</h2><span class="chip @(Model.Status == "completed" ? "green" : "amber")">@Model.Status.Replace('_', ' ')</span></div>
+    <div class="muted mb-3">@Model.RequestedAt.ToLocalTime().ToString("dddd, MMM d · HH:mm") · @v.Icon @v.Name</div>
+    <div class="p-3 rounded-4 bg-light mb-4">
+        <div class="mb-2 d-flex gap-2"><span class="dot-a"></span><span>@Model.Pickup</span></div>
+        <div class="d-flex gap-2"><span class="dot-b"></span><span>@Model.Drop</span></div>
+    </div>
+    <div class="row-l"><span>Base fare</span><span>৳@baseFare.ToString("0")</span></div>
+    <div class="row-l"><span>Distance (@Model.DistanceKm.ToString("0.0") km)</span><span>৳@dist.ToString("0")</span></div>
+    <div class="row-l"><span>Time (@Model.DurationMin min)</span><span>৳@time.ToString("0")</span></div>
+    @if (Model.Surge > 1) { <div class="row-l"><span>Surge ×@Model.Surge.ToString("0.0")</span><span>৳@Math.Max(0, surgeAmt).ToString("0")</span></div> }
+    <div class="divider"></div>
+    <div class="row-l fw-bold" style="font-size:1.4rem"><span>Total</span><span>৳@Model.Fare.ToString("0")</span></div>
+    <div class="muted small">Paid by @Model.PaymentMethod · Driver: @(Model.Driver?.Name ?? "—") @(Model.DriverRating is { } s ? $"· rated {s}★" : "")</div>
+    <div class="d-flex gap-2 mt-4 no-print"><button class="btn btn-dark" onclick="window.print()">Print</button><a class="btn btn-light" asp-action="History">All trips</a></div>
+</div></div>

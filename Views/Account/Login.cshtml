@@ -1,0 +1,12 @@
+@model LoginVm
+@{ ViewData["Title"] = "Log in"; }
+<div class="container"><div class="auth">
+    <h2>Welcome back</h2>
+    <form asp-action="Login" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+        <div class="mb-3"><input asp-for="Email" class="form-control" placeholder="Email" autocomplete="email" /></div>
+        <div class="mb-3"><input asp-for="Password" class="form-control" placeholder="Password" autocomplete="current-password" /></div>
+        <button class="btn btn-dark btn-lg w-100">Continue</button>
+    </form>
+    <p class="mt-4 muted">New to Ride Sync? <a asp-action="Register" class="fw-bold">Create an account</a></p>
+</div></div>

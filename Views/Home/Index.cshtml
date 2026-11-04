@@ -1,0 +1,61 @@
+@{ ViewData["Title"] = "Request a ride"; var authed = User.Identity?.IsAuthenticated == true; var go = authed ? Url.Action("Index", "Rides") : Url.Action("Register", "Account"); }
+<section class="hero"><div class="container-xl"><div class="row align-items-center g-5">
+    <div class="col-lg-6">
+        <h1>Go anywhere<br />with Ride Sync</h1>
+        <div class="book-card">
+            <form action="@go" method="get">
+                <div class="field"><span class="ico"></span><input class="form-control" placeholder="Pickup location" /></div>
+                <div class="field"><span class="ico sq"></span><input class="form-control" placeholder="Dropoff location" /></div>
+                <button class="btn btn-dark btn-lg mt-2">See prices</button>
+                @if (!authed) { <a class="btn btn-light btn-lg mt-2 ms-1" asp-controller="Account" asp-action="Login">Log in</a> }
+            </form>
+        </div>
+    </div>
+    <div class="col-lg-6"><div class="hero-map" id="heroMap"></div></div>
+</div></div></section>
+
+<section class="section alt"><div class="container-xl">
+    <h2>Choose your ride</h2>
+    <div class="row g-3">
+        @foreach (var v in Pricing.Vehicles.Values)
+        {
+            <div class="col-md-4"><div class="opt-card">
+                <div class="big">@v.Icon</div><h4 class="mt-2">@v.Name</h4>
+                <p class="muted mb-2">@v.Tagline · up to @v.Seats</p>
+                <span class="chip">From ৳@v.Base.ToString("0") + ৳@v.PerKm.ToString("0")/km</span>
+            </div></div>
+        }
+    </div>
+</div></section>
+
+<section class="section"><div class="container-xl">
+    <h2>How it works</h2>
+    <div class="row g-4">
+        <div class="col-md-3 feature"><div class="num">1</div><h5>Set your route</h5><p class="muted">Search an address or tap the map. See the price up front — including any surge.</p></div>
+        <div class="col-md-3 feature"><div class="num">2</div><h5>Get matched</h5><p class="muted">The nearest online drivers are alerted instantly. Exactly one driver gets your trip.</p></div>
+        <div class="col-md-3 feature"><div class="num">3</div><h5>Track live</h5><p class="muted">Watch your driver arrive on the map in real time.</p></div>
+        <div class="col-md-3 feature"><div class="num">4</div><h5>Pay &amp; rate</h5><p class="muted">Pay with cash or your wallet, then rate your driver.</p></div>
+    </div>
+</div></section>
+
+<section class="section alt"><div class="container-xl"><div class="cta-black row align-items-center g-4">
+    <div class="col-lg-8"><h2 class="text-white mb-2">Drive when you want, make what you need</h2><p class="mb-0" style="color:#afafaf">Go online, get requests from riders nearby, and cash out to your wallet.</p></div>
+    <div class="col-lg-4 text-lg-end"><a class="btn btn-light btn-lg btn-pill" asp-controller="Account" asp-action="Register" asp-route-role="Driver">Start driving</a></div>
+</div></div></section>
+
+<footer class="site"><div class="container-xl d-flex flex-wrap justify-content-between gap-3">
+    <div><b style="font-size:1.4rem">Ride Sync</b><div class="mt-1" style="color:#afafaf">ASP.NET Core MVC · SQL Server · Redis · SignalR</div></div>
+    <div class="d-flex gap-4"><a asp-controller="Lab" asp-action="Index">Race Lab</a><a asp-controller="Account" asp-action="Login">Log in</a><a asp-controller="Account" asp-action="Register">Sign up</a></div>
+</div></footer>
+
+@section Scripts {
+<script>
+  const m = L.map('heroMap', { zoomControl: false, scrollWheelZoom: false, dragging: false, attributionControl: true }).setView([23.78, 90.41], 12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom: 19 }).addTo(m);
+  const a = [23.7461, 90.3742], b = [23.7937, 90.4066];
+  L.polyline([a, [23.7600, 90.3800], [23.7750, 90.3950], b], { color: '#000', weight: 5 }).addTo(m);
+  L.circleMarker(a, { radius: 8, color: '#000', fillColor: '#fff', fillOpacity: 1, weight: 4 }).addTo(m);
+  L.marker(b, { icon: L.divIcon({ className: '', html: '<div class="pin sq"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }) }).addTo(m);
+  m.fitBounds([a, b], { padding: [60, 60] });
+</script>
+}

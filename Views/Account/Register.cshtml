@@ -1,0 +1,31 @@
+@model RegisterVm
+@{ ViewData["Title"] = "Sign up"; }
+<div class="container"><div class="auth">
+    <h2>Let's get started</h2>
+    <form asp-action="Register" method="post">
+        <div asp-validation-summary="All" class="text-danger mb-2"></div>
+        <div class="seg">
+            <label><input type="radio" asp-for="Role" value="Rider" /><span>🧍 Ride</span></label>
+            <label><input type="radio" asp-for="Role" value="Driver" /><span>🚗 Drive</span></label>
+        </div>
+        <div class="mb-3"><input asp-for="Name" class="form-control" placeholder="Full name" /></div>
+        <div class="mb-3"><input asp-for="Email" class="form-control" placeholder="Email" /></div>
+        <div class="mb-3"><input asp-for="Password" class="form-control" placeholder="Password (6+ characters)" /></div>
+        <div id="driverFields" style="display:none">
+            <div class="mb-3"><select asp-for="VehicleType" class="form-select">
+                @foreach (var v in Pricing.Vehicles.Values) { <option value="@v.Id">@v.Icon @v.Name</option> }
+            </select></div>
+            <div class="mb-3"><input asp-for="VehicleNumber" class="form-control" placeholder="Vehicle number plate" /></div>
+        </div>
+        <button class="btn btn-dark btn-lg w-100">Create account</button>
+    </form>
+    <p class="mt-4 muted">Already have an account? <a asp-action="Login" class="fw-bold">Log in</a></p>
+</div></div>
+@section Scripts {
+<script>
+  const sync = () => document.getElementById('driverFields').style.display = document.querySelector('input[name=Role]:checked')?.value === 'Driver' ? '' : 'none';
+  document.querySelectorAll('input[name=Role]').forEach(r => r.addEventListener('change', sync));
+  if (new URLSearchParams(location.search).get('role') === 'Driver') document.querySelector('input[name=Role][value=Driver]').checked = true;
+  sync();
+</script>
+}
